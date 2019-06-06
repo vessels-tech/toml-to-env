@@ -4,20 +4,36 @@ const tomlToEnv = require('../')
 const shellEscape = require('shell-escape')
 require('yargs')
   .usage('$0 <command|path>')
-  .command(['export <path>', '*'], 'generate export commands from TOML', () => {}, (argv) => {
+  .command(['export <path>', '*'], 'generate export commands from TOML', () => { }, (argv) => {
     tomlToEnv(argv.path, (err, env) => {
       if (err) {
         console.error(err.message)
         process.exit(1)
       } else {
         Object.keys(env).forEach((key) => {
-          console.log(`export ${key}=${shellEscape([env[key]])}`)
+          const value = env[key];
+
+          if (Array.isArray(value)) {
+            //print as a space separated list
+            const newValue = value.reduce((acc, curr) => {
+              if (acc.length === 0) {
+                return curr;
+              }
+
+              return `${acc} ${curr}`;
+            }, '');
+
+            console.log(`export ${key}=${shellEscape([newValue])}`)
+            return;
+          }
+
+          console.log(`export ${key}=${shellEscape([value])}`)
         })
         process.exit(0)
       }
     })
   })
-  .command('unset <path>', 'generate unset commands based on TOML config', () => {}, (argv) => {
+  .command('unset <path>', 'generate unset commands based on TOML config', () => { }, (argv) => {
     tomlToEnv(argv.path, (err, env) => {
       if (err) {
         console.error(err.message)
