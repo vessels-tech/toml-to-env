@@ -20,7 +20,7 @@ require('yargs')
                 return curr;
               }
 
-              return `${acc} ${curr}`;
+              return `${acc};${curr}`;
             }, '');
 
             console.log(`export ${key}=${shellEscape([newValue])}`)
